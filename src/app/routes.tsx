@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Link, Navigate, type RouteObject } from 'react-router-dom'
+import { BackupPage } from '../features/backup/BackupPage'
 import { BeanPage } from '../features/beans/BeanPage'
 import { ComparePage } from '../features/compare/ComparePage'
 import { CupFormPage } from '../features/cup/CupFormPage'
@@ -9,6 +10,9 @@ import { GearPage } from '../features/gear/GearPage'
 import { HistoryPage } from '../features/history/HistoryPage'
 import { HomePage } from '../features/home/HomePage'
 import { PlaceholderPage } from '../features/placeholder/PlaceholderPage'
+import { DefaultsPage } from '../features/settings/DefaultsPage'
+import { InstallPage } from '../features/settings/InstallPage'
+import { GeneralSettingsPage, SettingsPage, TrackedPage } from '../features/settings/SettingsPages'
 import { ShotDetailPage } from '../features/shot/ShotDetailPage'
 import { ShotFormPage } from '../features/shot/ShotFormPage'
 import { ErrorScreen } from '../ui/ErrorScreen'
@@ -59,8 +63,12 @@ export const routes: RouteObject[] = [
       page('devices/new', form(S.titles.newDevice), <DeviceFormPage mode="new" />),
       page('devices/:id', sub(S.titles.device), <DeviceDetailPage />),
       page('devices/:id/edit', form(S.titles.editDevice), <DeviceFormPage mode="edit" />),
-      page('settings', sub(S.settings)),
-      page('settings/:section', sub(S.settings)),
+      page('settings', sub(S.settings), <SettingsPage />),
+      page('settings/general', sub(S.titles.general), <GeneralSettingsPage />),
+      page('settings/tracked', sub(S.titles.tracked), <TrackedPage />),
+      page('settings/defaults', form(S.titles.defaults), <DefaultsPage />),
+      page('settings/backup', sub(S.titles.backup), <BackupPage />),
+      page('settings/install', sub(S.titles.install), <InstallPage />),
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

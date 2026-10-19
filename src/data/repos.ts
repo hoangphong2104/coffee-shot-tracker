@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import type { ShotTrackerDB } from './db'
-import type { Bean, Cup, Device, DeviceSlot, Method, Shot } from './types'
+import type { Bean, Cup, Device, DeviceSlot, Method, Settings, Shot } from './types'
 
 // MOD_004 — repository trên Dexie. Mọi ghi nhiều bảng nằm trong một transaction (cùng thành công / thất bại).
 
@@ -145,5 +145,13 @@ export async function setGaugeMax(db: ShotTrackerDB, id: string, max: number, no
     const d = await db.devices.get(id)
     if (!d?.gauge) return
     await db.devices.update(id, { gauge: { ...d.gauge, max }, updatedAt: now })
+  })
+}
+
+/** UC_0401..UC_0404 — ghi một phần cài đặt; [Ngày giờ sửa cuối] = lúc lưu. */
+export async function updateSettings(db: ShotTrackerDB, patch: Partial<Omit<Settings, 'id'>>, now: number) {
+  await db.transaction('rw', db.settings, async () => {
+    const st = (await db.settings.get('main'))!
+    await db.settings.put({ ...st, ...patch, updatedAt: now })
   })
 }
