@@ -43,3 +43,29 @@ export function toBeanRecord(f: BeanForm, tracked: Settings['tracked'], now: num
     updatedAt: now,
   }
 }
+
+export const beanFormFrom = (b: Bean): BeanForm => ({
+  name: b.name, roaster: b.roaster ?? '', origin: b.origin ?? '', roastLevel: b.roastLevel ?? null, process: b.process ?? null, roastDate: b.roastDate ?? '',
+})
+
+/** UC_0203 bước 4 — giữ id, trạng thái, ngày tạo; trường đang tắt giữ giá trị cũ (Q-030). */
+export function applyBeanEdit(b: Bean, f: BeanForm, tracked: Settings['tracked'], now: number): Bean {
+  const on = (k: keyof typeof BEAN_TRACKED) => beanFieldOn(tracked, k)
+  return {
+    ...b,
+    name: f.name.trim(),
+    roaster: on('roaster') ? f.roaster.trim() : b.roaster,
+    origin: on('origin') ? f.origin.trim() : b.origin,
+    roastLevel: on('roastLevel') ? f.roastLevel : b.roastLevel,
+    process: on('process') ? f.process : b.process,
+    roastDate: on('roastDate') ? f.roastDate || null : b.roastDate,
+    updatedAt: now,
+  }
+}
+
+/** UC_0201 bước 4 / UC_0203 bước 2 — số shot và rating cao nhất của ly. */
+export function beanStats(beanId: string, shots: { id: string; beanId: string }[], cups: { shotId: string; rating?: number | null }[]) {
+  const ids = new Set(shots.filter((s) => s.beanId === beanId).map((s) => s.id))
+  const ratings = cups.filter((c) => ids.has(c.shotId) && c.rating != null).map((c) => c.rating!)
+  return { count: ids.size, best: ratings.length ? Math.max(...ratings) : null }
+}

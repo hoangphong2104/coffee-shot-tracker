@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 
 export default tseslint.config(
   { ignores: ['dist', 'dev-dist', 'coverage'] },
+  { files: ['scripts/**/*.mjs'], languageOptions: { globals: { process: 'readonly', console: 'readonly' } } },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -26,7 +26,7 @@ export const S = {
     cup: 'Thưởng thức',
     compare: 'So sánh 2 shot',
     newBean: 'Thêm hạt',
-    bean: 'Hạt',
+    bean: 'Sửa hạt',
     newDevice: 'Thêm thiết bị',
     device: 'Thiết bị',
     editDevice: 'Sửa thiết bị',

@@ -1,6 +1,10 @@
 import { Link, Navigate, type RouteObject } from 'react-router-dom'
+import { BeanPage } from '../features/beans/BeanPage'
 import { ComparePage } from '../features/compare/ComparePage'
 import { CupFormPage } from '../features/cup/CupFormPage'
+import { DeviceDetailPage } from '../features/gear/DeviceDetailPage'
+import { DeviceFormPage } from '../features/gear/DeviceFormPage'
+import { GearPage } from '../features/gear/GearPage'
 import { HistoryPage } from '../features/history/HistoryPage'
 import { HomePage } from '../features/home/HomePage'
 import { PlaceholderPage } from '../features/placeholder/PlaceholderPage'
@@ -45,12 +49,12 @@ export const routes: RouteObject[] = [
       page('shots/:id/cup', form(S.titles.cup), <CupFormPage />),
       page('compare', sub(S.titles.compare), <ComparePage />),
       page('analytics', tabRoot(S.tabs.analytics)),
-      page('gear', tabRoot(S.tabs.gear)),
-      page('beans/new', form(S.titles.newBean)),
-      page('beans/:id', form(S.titles.bean)),
-      page('devices/new', form(S.titles.newDevice)),
-      page('devices/:id', sub(S.titles.device)),
-      page('devices/:id/edit', form(S.titles.editDevice)),
+      page('gear', tabRoot(S.tabs.gear), <GearPage />),
+      page('beans/new', form(S.titles.newBean), <BeanPage mode="new" />),
+      page('beans/:id', form(S.titles.bean), <BeanPage mode="edit" />),
+      page('devices/new', form(S.titles.newDevice), <DeviceFormPage mode="new" />),
+      page('devices/:id', sub(S.titles.device), <DeviceDetailPage />),
+      page('devices/:id/edit', form(S.titles.editDevice), <DeviceFormPage mode="edit" />),
       page('settings', sub(S.settings)),
       page('settings/:section', sub(S.settings)),
       { path: '*', element: <Navigate to="/" replace /> },

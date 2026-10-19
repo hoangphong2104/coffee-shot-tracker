@@ -1,5 +1,7 @@
 import { ShotTrackerDB } from './db'
-import { activeBeansByRecentUse, deleteShot, latestShotByMethod, saveShot, upsertCupByShot, GoneError } from './repos'
+import { activeBeansByRecentUse, deleteShot, latestShotByMethod, saveShot, upsertCupByShot, GoneError, setBeanStatus, setDeviceStatus, setCurrentDevice, updateDevice, updateBean, setGaugeMax } from './repos'
+import { SEED_DEVICES } from './seed'
+import { settingsTD01 } from '../test/td01'
 import { beansTD01, S1, S2, S3 } from '../test/td01'
 import type { Cup } from './types'
 
@@ -61,4 +63,37 @@ it('latestShotByMethod: shot Espresso mới nhất; không có Aeropress (AC-010
 
 it('activeBeansByRecentUse: chỉ hạt Đang dùng, mới dùng trước (UC_0103 bước 4)', async () => {
   expect((await activeBeansByRecentUse(db)).map((b) => b.id)).toEqual(['col', 'eth'])
+})
+
+describe('hạt / thiết bị (UC_0203..0205, UC_0302, UC_0304, UC_0305, UC_0307)', () => {
+  beforeEach(async () => {
+    await db.settings.put(settingsTD01())
+    await db.devices.bulkAdd([...SEED_DEVICES, { ...SEED_DEVICES[0], id: 'm1', builtin: false, name: 'M1' }])
+  })
+  it('UC_0204 / 0205: chuyển trạng thái; đã ở trạng thái đích → same; không còn → gone', async () => {
+    expect(await setBeanStatus(db, 'eth', 'out', 5)).toBe('ok')
+    expect((await db.beans.get('eth'))).toMatchObject({ status: 'out', updatedAt: 5 })
+    expect(await setBeanStatus(db, 'eth', 'out', 6)).toBe('same')
+    expect(await setBeanStatus(db, 'zzz', 'active', 6)).toBe('gone')
+    expect(await updateBean(db, { ...beansTD01[0], id: 'zzz' })).toBe('gone')
+  })
+  it('UC_0305: ẩn custom đang dùng → bỏ khỏi ô đang dùng; UC_0307 hiện lại không đổi DO_005', async () => {
+    await setCurrentDevice(db, 'grinder', 'm1', 1)
+    expect(await setDeviceStatus(db, 'm1', 'hidden', 2)).toEqual({ r: 'ok', cleared: true })
+    expect((await db.settings.get('main'))!.current.grinder).toBeNull()
+    expect(await setDeviceStatus(db, 'm1', 'active', 3)).toEqual({ r: 'ok', cleared: false })
+    expect((await db.settings.get('main'))!.current.grinder).toBeNull()
+    expect(await setDeviceStatus(db, 'df64', 'hidden', 3)).toEqual({ r: 'skip', cleared: false }) // máy có sẵn không ẩn được
+  })
+  it('UC_0302 bước 8: không đặt được thiết bị đã ẩn; UC_0304: máy có sẵn không sửa được', async () => {
+    await setDeviceStatus(db, 'm1', 'hidden', 2)
+    expect(await setCurrentDevice(db, 'grinder', 'm1', 3)).toBe('gone')
+    expect(await updateDevice(db, { ...SEED_DEVICES[0], name: 'X' })).toBe('gone')
+  })
+  it('UC_0302 bước 7: sửa thang giữ lần căn', async () => {
+    const cal = { c: [1, 1], z: [0, 0], m: [2, 2] } as never
+    await db.devices.update('gemilai-3007l', { gauge: { max: 15, lastCalibration: cal } })
+    await setGaugeMax(db, 'gemilai-3007l', 16, 4)
+    expect((await db.devices.get('gemilai-3007l'))!.gauge).toEqual({ max: 16, lastCalibration: cal })
+  })
 })

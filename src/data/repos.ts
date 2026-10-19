@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import type { ShotTrackerDB } from './db'
-import type { Bean, Cup, Method, Shot } from './types'
+import type { Bean, Cup, Device, DeviceSlot, Method, Shot } from './types'
 
 // MOD_004 — repository trên Dexie. Mọi ghi nhiều bảng nằm trong một transaction (cùng thành công / thất bại).
 
@@ -72,3 +72,78 @@ export async function activeBeansByRecentUse(db: ShotTrackerDB): Promise<Bean[]>
 
 /** UC_0202 bước 4. */
 export const addBean = (db: ShotTrackerDB, b: Bean) => db.beans.add(b)
+
+/** UC_0203 bước 4 — kiểm hạt còn rồi ghi. */
+export async function updateBean(db: ShotTrackerDB, rec: Bean): Promise<'ok' | 'gone'> {
+  return db.transaction('rw', db.beans, async () => {
+    if (!(await db.beans.get(rec.id))) return 'gone'
+    await db.beans.put(rec)
+    return 'ok'
+  })
+}
+
+/** UC_0204 / UC_0205 — đã ở trạng thái đích → 'same' (vẽ lại, không báo lỗi). */
+export async function setBeanStatus(db: ShotTrackerDB, id: string, status: Bean['status'], now: number): Promise<'ok' | 'same' | 'gone'> {
+  return db.transaction('rw', db.beans, async () => {
+    const b = await db.beans.get(id)
+    if (!b) return 'gone'
+    if (b.status === status) return 'same'
+    await db.beans.update(id, { status, updatedAt: now })
+    return 'ok'
+  })
+}
+
+/** UC_0303 / UC_0306 bước 9–10. */
+export const addDevice = (db: ShotTrackerDB, d: Device) => db.devices.add(d)
+
+/** UC_0304 bước 2, 4–5 — thiết bị không còn hoặc không phải custom → 'gone'. */
+export async function updateDevice(db: ShotTrackerDB, rec: Device): Promise<'ok' | 'gone'> {
+  return db.transaction('rw', db.devices, async () => {
+    const old = await db.devices.get(rec.id)
+    if (!old || old.builtin) return 'gone'
+    await db.devices.put(rec)
+    return 'ok'
+  })
+}
+
+/**
+ * UC_0305 (ẩn) / UC_0307 (hiện lại) — chỉ thiết bị custom. Ẩn → bỏ khỏi mọi ô đang dùng (DO_005);
+ * trả về `cleared` để chọn toast. Hiện lại không đổi DO_005.
+ */
+export async function setDeviceStatus(db: ShotTrackerDB, id: string, status: Device['status'], now: number): Promise<{ r: 'ok' | 'skip'; cleared: boolean }> {
+  return db.transaction('rw', db.devices, db.settings, async () => {
+    const d = await db.devices.get(id)
+    if (!d || d.builtin || d.status === status) return { r: 'skip' as const, cleared: false }
+    await db.devices.update(id, { status, updatedAt: now })
+    let cleared = false
+    if (status === 'hidden') {
+      const st = (await db.settings.get('main'))!
+      const current = { ...st.current }
+      for (const k of Object.keys(current) as DeviceSlot[]) if (current[k] === id) { current[k] = null; cleared = true }
+      if (cleared) await db.settings.put({ ...st, current, updatedAt: now })
+    }
+    return { r: 'ok' as const, cleared }
+  })
+}
+
+/** UC_0302 bước 8 / UC_0401 bước 3 — thiết bị phải còn Hoạt động. */
+export async function setCurrentDevice(db: ShotTrackerDB, slot: DeviceSlot, id: string | null, now: number): Promise<'ok' | 'gone'> {
+  return db.transaction('rw', db.devices, db.settings, async () => {
+    if (id) {
+      const d = await db.devices.get(id)
+      if (!d || d.status !== 'active') return 'gone'
+    }
+    const st = (await db.settings.get('main'))!
+    await db.settings.put({ ...st, current: { ...st.current, [slot]: id }, updatedAt: now })
+    return 'ok'
+  })
+}
+
+/** UC_0302 bước 7 — sửa thang đồng hồ của máy có sẵn (giữ lần căn). */
+export async function setGaugeMax(db: ShotTrackerDB, id: string, max: number, now: number) {
+  await db.transaction('rw', db.devices, async () => {
+    const d = await db.devices.get(id)
+    if (!d?.gauge) return
+    await db.devices.update(id, { gauge: { ...d.gauge, max }, updatedAt: now })
+  })
+}
