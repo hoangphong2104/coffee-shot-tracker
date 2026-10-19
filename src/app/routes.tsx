@@ -1,5 +1,7 @@
 import { Link, Navigate, type RouteObject } from 'react-router-dom'
+import { ComparePage } from '../features/compare/ComparePage'
 import { CupFormPage } from '../features/cup/CupFormPage'
+import { HistoryPage } from '../features/history/HistoryPage'
 import { HomePage } from '../features/home/HomePage'
 import { PlaceholderPage } from '../features/placeholder/PlaceholderPage'
 import { ShotDetailPage } from '../features/shot/ShotDetailPage'
@@ -31,7 +33,7 @@ export const routes: RouteObject[] = [
     errorElement: <ErrorScreen message={S.crashTitle} actionLabel={S.reload} onAction={() => location.reload()} />,
     children: [
       { index: true, handle: { title: S.appName, tabRoot: true, actions: Gear } satisfies RouteHandle, element: <HomePage /> },
-      page('history', tabRoot(S.tabs.history)),
+      page('history', tabRoot(S.tabs.history), <HistoryPage />),
       page('shots/new', form(S.titles.newShot), <ShotFormPage mode="new" />),
       page('shots/new/video', form(S.titles.video)),
       page('shots/new/gauge', form(S.titles.gauge)),
@@ -41,7 +43,7 @@ export const routes: RouteObject[] = [
       page('shots/:id/edit/gauge', form(S.titles.gauge)),
       page('shots/:id/gauge', form(S.titles.gauge)),
       page('shots/:id/cup', form(S.titles.cup), <CupFormPage />),
-      page('compare', sub(S.titles.compare)),
+      page('compare', sub(S.titles.compare), <ComparePage />),
       page('analytics', tabRoot(S.tabs.analytics)),
       page('gear', tabRoot(S.tabs.gear)),
       page('beans/new', form(S.titles.newBean)),

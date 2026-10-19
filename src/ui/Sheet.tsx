@@ -20,7 +20,7 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
   )
 }
 
-export interface PickItem { value: string; text: string; sub?: string; on?: boolean }
+export interface PickItem { value: string; text: string; sub?: string; on?: boolean; disabled?: boolean; /** chữ dùng cho ô tìm (mặc định = text) */ search?: string }
 
 /** Danh sách chọn trong sheet, có ô tìm tuỳ chọn (so khớp không dấu). */
 export function PickList({ title, items, onPick, onClose, search, footer }: {
@@ -32,7 +32,7 @@ export function PickList({ title, items, onPick, onClose, search, footer }: {
   footer?: ReactNode
 }) {
   const [q, setQ] = useState('')
-  const list = q ? items.filter((it) => fold(it.text).includes(fold(q))) : items
+  const list = q ? items.filter((it) => fold(it.search ?? it.text).includes(fold(q))) : items
   return (
     <Sheet title={title} onClose={onClose}>
       {search && (
@@ -44,7 +44,7 @@ export function PickList({ title, items, onPick, onClose, search, footer }: {
       <div className="list">
         {list.length ? (
           list.map((it) => (
-            <button key={it.value} className="li" onClick={() => onPick(it.value)}>
+            <button key={it.value} className="li" disabled={it.disabled} style={it.disabled ? { opacity: 0.45 } : undefined} onClick={() => onPick(it.value)}>
               <span className="main">
                 <b>{it.text}</b>
                 {it.sub && <div className="s">{it.sub}</div>}

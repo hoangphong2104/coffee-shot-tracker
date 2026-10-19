@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { NavLink, Outlet, useMatches } from 'react-router-dom'
+import { NavLink, Outlet, ScrollRestoration, useMatches } from 'react-router-dom'
 import { S } from '../strings.vi'
 import { useGoBack } from './nav'
 
@@ -59,6 +59,8 @@ export function Shell() {
         </ActionSlot.Provider>
       </main>
       {!handle.hideTabs && <TabBar />}
+      {/* UC_0101 bước 6 — quay lại giữ vị trí cuộn */}
+      <ScrollRestoration />
     </div>
   )
 }

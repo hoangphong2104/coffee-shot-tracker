@@ -6,14 +6,16 @@ import { cupByShot, deleteShot } from '../../data/repos'
 import type { Cup, Device, Param, Shot } from '../../data/types'
 import { cupLines, drinkName, TASTES } from '../../domain/cup'
 import { daysSince, dd, fmt, fmtSec, fromIso, hm, longDate } from '../../domain/format'
-import { fmtRatio, methodName, paramLabel, ratio, ratioStyle } from '../../domain/shot'
+import { fmtRatio, methodName, paramLabel, ratio, ratioStyle, recipe } from '../../domain/shot'
+import { useBeans, useShotViews } from '../../data/hooks'
 import { EmptyState } from '../../ui/controls'
 import { useFeedback } from '../../ui/feedback'
 import { Right } from '../../ui/icons'
 import { useGoBack } from '../../ui/nav'
 import { useHeaderAction } from '../../ui/Shell'
+import { PickList } from '../../ui/Sheet'
 
-// SC_0103 / UC_0106 — chi tiết shot hai tab; UC_0108 xoá. So sánh (UC_0109) và video (UC_0120) nối ở CODE-003 / CODE-007.
+// SC_0103 / UC_0106 — chi tiết shot hai tab; UC_0108 xoá; So sánh → UC_0109. Video (UC_0120) nối ở CODE-007.
 
 const devName = (d?: Device) => (d ? `${d.brand} ${d.name}` : 'Chưa chọn')
 
@@ -138,6 +140,7 @@ function ShotTab({ shot, cup, bean, grinder, brewer, onDelete }: {
       (bean.roastDate ? `${bean.origin || bean.roastLevel || bean.process ? ' · ' : ''}rang ${fromIso(bean.roastDate)} (${daysSince(bean.roastDate, shot.brewedAt)} ngày trước khi pha)` : '')
     : ''
   const edited = shot.updatedAt - shot.createdAt > 60_000
+  const [comparing, setComparing] = useState(false)
 
   return (
     <>
@@ -178,8 +181,10 @@ function ShotTab({ shot, cup, bean, grinder, brewer, onDelete }: {
       <div className="grid grid-cols-2 gap-2.5">
         {!cup && <Link className="btn btn-primary col-span-2" to={`/shots/${shot.id}/cup`}>Thưởng thức</Link>}
         <Link className="btn btn-ghost" to={`/shots/new?from=${shot.id}`}>Pha lại</Link>
-        <button className="btn btn-danger" onClick={onDelete}>Xoá</button>
+        <button className="btn btn-ghost" onClick={() => setComparing(true)}>So sánh</button>
+        <button className="btn btn-danger col-span-2" onClick={onDelete}>Xoá</button>
       </div>
+      {comparing && <CompareWith shot={shot} onClose={() => setComparing(false)} />}
     </>
   )
 }
@@ -223,5 +228,28 @@ function CupTab({ shotId, cup }: { shotId: string; cup?: Cup }) {
       )}
       <Link className="btn btn-ghost" to={`/shots/${shotId}/cup`}>Sửa thưởng thức</Link>
     </>
+  )
+}
+
+/** UC_0106 bước 3 — sheet "So sánh với shot": shot khác, tìm theo tên hạt → SC_0105 (A = shot đang xem). */
+function CompareWith({ shot, onClose }: { shot: Shot; onClose: () => void }) {
+  const navigate = useNavigate()
+  const views = useShotViews()
+  const beans = useBeans()
+  if (!views || !beans) return null
+  const name = (id: string) => beans.find((b) => b.id === id)?.name ?? '—'
+  return (
+    <PickList
+      title="So sánh với shot"
+      search="Tìm theo tên hạt"
+      items={views
+        .filter((v) => v.id !== shot.id)
+        .map((v) => ({ value: v.id, text: `${dd(v.brewedAt)} ${hm(v.brewedAt)} · ${name(v.beanId)}`, sub: `${methodName(v)} · ${recipe(v)}`, search: name(v.beanId) }))}
+      onPick={(id) => {
+        onClose()
+        navigate(`/compare?a=${shot.id}&b=${id}`)
+      }}
+      onClose={onClose}
+    />
   )
 }

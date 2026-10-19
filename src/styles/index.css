@@ -152,5 +152,49 @@
   .empty { text-align: center; padding: 36px 12px; display: flex; flex-direction: column; gap: 14px; align-items: center; color: var(--muted); }
   .empty b { color: var(--fg); font-size: 17px; font-weight: 300; }
   .card { border-top: 1px solid var(--line); padding-top: 16px; }
+  /* Thẻ shot một dòng mảnh (UC_0101 bước 4) */
+  .shot { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; text-align: left; width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 14px 0; color: inherit; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .shot:active { opacity: 0.6; }
+  .shot .t { font-size: 12px; color: var(--muted); }
+  .shot .b { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .shot .r { grid-row: 1 / span 3; grid-column: 2; }
+  .shot .f { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .shot.sel { outline: 1px solid var(--fg); outline-offset: 2px; }
+  .rating { min-width: 36px; text-align: right; font-size: 24px; font-weight: 200; font-variant-numeric: tabular-nums; }
+  .rating .small { font-size: 12px; color: var(--muted); }
+  .rating.hi { font-weight: 300; }
+  .badge { font-size: 12px; font-weight: 300; color: var(--muted); white-space: nowrap; }
+  .badge.custom { color: var(--fg); font-style: italic; }
+  .day-h { position: sticky; top: calc(56px + env(safe-area-inset-top)); z-index: 5; background: var(--bg); padding: 10px 0 6px; margin: 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 400; letter-spacing: var(--track); text-transform: uppercase; border-bottom: 1px solid var(--fg); }
+  .day-h span { font-weight: 300; font-size: 12px; color: var(--muted); letter-spacing: 0; text-transform: none; }
+
+  /* Trang chủ v2.0 (UXP-032) */
+  .home { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 8px; }
+  .home .dash { width: 18px; height: 1px; background: var(--fg); }
+  .last-ring { margin-top: 36px; width: min(64vw, 236px); aspect-ratio: 1 / 1; border-radius: 50%; border: 1px solid var(--fg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .last-ring .k { font-size: 11px; font-weight: 400; letter-spacing: 0.28em; color: var(--muted); }
+  .last-ring .big { font-size: 52px; font-weight: 200; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; line-height: 1.05; }
+  .last-ring .sub { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .home .bean { margin-top: 28px; font-size: 17px; }
+  .home .meta { margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .home .cta { margin-top: 28px; width: 200px; min-height: 48px; border: 1px solid var(--fg); border-radius: 999px; background: transparent; color: var(--fg); font-size: 13px; font-weight: 400; letter-spacing: var(--track); display: inline-flex; align-items: center; justify-content: center; }
+  .home .cta:active { background: var(--fg); color: var(--bg); }
+  .home .wait { margin-top: 14px; min-height: 44px; border: 0; background: transparent; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  .home .recent { align-self: stretch; text-align: left; margin-top: 28px; }
+  .home .recent-h { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--fg); padding-bottom: 6px; }
+  .home .note { margin-top: 18px; font-size: 12px; color: var(--muted); }
+  .home .note .link-btn { font-size: 12px; color: var(--muted); padding: 10px 4px; }
+
+  /* Bảng so sánh (UC_0109) */
+  table.tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 15px; }
+  .tbl th, .tbl td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: top; font-weight: 300; }
+  .tbl th { font-size: 11px; color: var(--muted); font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; }
+  .tbl tr.diff td { background: var(--surface-2); }
+  .tbl .delta { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .bar.b > i { background: var(--faint); }
+  .switch { appearance: none; width: 46px; height: 28px; border-radius: 999px; background: transparent; border: 1px solid var(--muted); position: relative; flex: none; transition: background 0.2s; }
+  .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform 0.2s; }
+  .switch:checked { background: var(--fg); border-color: var(--fg); }
+  .switch:checked::after { transform: translateX(18px); background: var(--bg); }
   .link-btn { @apply min-h-tap px-1.5 underline underline-offset-4; text-decoration-thickness: 1px; font-weight: 400; background: transparent; border: 0; color: var(--fg); }
 }

@@ -24,7 +24,7 @@ export const S = {
     shotDetail: 'Chi tiết shot',
     editShot: 'Sửa shot',
     cup: 'Thưởng thức',
-    compare: 'So sánh',
+    compare: 'So sánh 2 shot',
     newBean: 'Thêm hạt',
     bean: 'Hạt',
     newDevice: 'Thêm thiết bị',
