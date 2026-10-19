@@ -15,6 +15,12 @@ npm run build     # dist/ — có CSP và service worker
 npm run preview   # chạy thử bản build
 ```
 
+## Phát hành (NFR_009)
+
+GitHub Actions (`.github/workflows/ci.yml`): lint → test → build → Lighthouse mobile (Performance ≥ 90, chặn nếu thấp hơn) → deploy GitHub Pages khi đẩy lên `main`. Base path tương đối (`./`) nên chạy dưới bất kỳ tên repo nào. Cần bật **Settings → Pages → Source: GitHub Actions** một lần.
+
+Icon PNG sinh từ thiết kế đã duyệt: `node scripts/gen-icons.mjs`. Hình nét vẽ: `node scripts/gen-illu.mjs …` (xem đầu file).
+
 ## Cấu trúc
 
 | Thư mục | Vai trò |

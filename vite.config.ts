@@ -25,7 +25,7 @@ export default defineConfig({
     csp(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icon.svg'],
+      includeManifestIcons: false, // icon đã nằm trong globPatterns — tránh precache trùng
       manifest: {
         name: 'Coffee Shot Tracker',
         short_name: 'Shot Tracker',
@@ -37,12 +37,16 @@ export default defineConfig({
         orientation: 'portrait',
         background_color: '#FFFFFF',
         theme_color: '#FFFFFF',
+        id: './',
+        // PNG cho Android / Lighthouse; SVG cho trình duyệt hỗ trợ. Vòng tròn nằm trong vùng an toàn → dùng được làm maskable.
         icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
         ],
       },
-      workbox: { globPatterns: ['**/*.{js,css,html,svg,woff2,json}'] },
+      workbox: { globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'] },
     }),
   ],
   test: {

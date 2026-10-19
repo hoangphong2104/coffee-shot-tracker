@@ -1,10 +1,14 @@
-# CODE-000 — CI tối thiểu: lint, test, build trên mỗi push / PR. Deploy GitHub Pages ở CODE-008.
+# ADR_013 / NFR_009 — lint → test → build → Lighthouse (NFR_001: Performance ≥ 90) → deploy GitHub Pages (chỉ nhánh main).
 name: ci
 on:
   push:
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -18,3 +22,27 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - name: Lighthouse (mobile)
+        run: npx --yes @lhci/cli@0.15.1 autorun
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse
+          path: lhci
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          path: dist
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
