@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Link, Navigate, type RouteObject } from 'react-router-dom'
 import { BeanPage } from '../features/beans/BeanPage'
 import { ComparePage } from '../features/compare/ComparePage'
@@ -25,6 +26,9 @@ const Gear = () => (
   </Link>
 )
 
+// ADR_005 — Recharts chỉ tải khi mở tab Biểu đồ
+const AnalyticsPage = lazy(() => import('../features/analytics/AnalyticsPage'))
+
 const page = (path: string, handle: RouteHandle, element = <PlaceholderPage />): RouteObject => ({ path, handle, element })
 const tabRoot = (title: string): RouteHandle => ({ title, tabRoot: true })
 const form = (title: string): RouteHandle => ({ title, hideTabs: true })
@@ -48,7 +52,7 @@ export const routes: RouteObject[] = [
       page('shots/:id/gauge', form(S.titles.gauge)),
       page('shots/:id/cup', form(S.titles.cup), <CupFormPage />),
       page('compare', sub(S.titles.compare), <ComparePage />),
-      page('analytics', tabRoot(S.tabs.analytics)),
+      page('analytics', tabRoot(S.titles.analytics), <Suspense fallback={null}><AnalyticsPage /></Suspense>),
       page('gear', tabRoot(S.tabs.gear), <GearPage />),
       page('beans/new', form(S.titles.newBean), <BeanPage mode="new" />),
       page('beans/:id', form(S.titles.bean), <BeanPage mode="edit" />),
