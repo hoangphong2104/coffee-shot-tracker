@@ -1,5 +1,7 @@
-import { NavLink, Outlet, useMatches, useNavigate } from 'react-router-dom'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { NavLink, Outlet, useMatches } from 'react-router-dom'
 import { S } from '../strings.vi'
+import { useGoBack } from './nav'
 
 // FE_MOD_001 / SC_0000 v2.0 — header chữ hoa căn giữa; thanh tab bằng chữ, nút ＋ tròn ở giữa (ẩn trên màn form).
 
@@ -21,26 +23,40 @@ const Back = () => (
   </svg>
 )
 
+// Khe hành động bên phải header cho màn cần nút thay đổi theo trạng thái (VD "Sửa" chỉ ở tab Shot — UC_0106 bước 2).
+const ActionSlot = createContext<(n: ReactNode) => void>(() => {})
+export function useHeaderAction(node: ReactNode) {
+  const set = useContext(ActionSlot)
+  useEffect(() => {
+    set(node)
+    return () => set(null)
+  }, [set, node])
+}
+
 export function Shell() {
   const matches = useMatches()
-  const navigate = useNavigate()
-  const handle = (matches[matches.length - 1]?.handle ?? { title: S.appName }) as RouteHandle
+  const goBack = useGoBack()
+  const [slot, setSlot] = useState<ReactNode>(null)
+  const match = matches[matches.length - 1]
+  const handle = (match?.handle ?? { title: S.appName }) as RouteHandle
 
   return (
     <div className="mx-auto min-h-full max-w-app bg-bg">
       <header className="sticky top-[env(safe-area-inset-top)] z-20 grid min-h-14 grid-cols-[minmax(44px,1fr)_auto_minmax(44px,1fr)] items-center gap-1 bg-bg px-2 py-2">
         <div className="justify-self-start">
           {!handle.tabRoot && (
-            <button className="grid h-11 w-11 place-items-center rounded-full" aria-label={S.back} onClick={() => navigate(-1)}>
+            <button className="grid h-11 w-11 place-items-center rounded-full" aria-label={S.back} onClick={() => goBack()}>
               <Back />
             </button>
           )}
         </div>
         <h1 className="caps m-0 max-w-[56vw] truncate text-center text-xs">{handle.title}</h1>
-        <div className="flex items-center justify-self-end">{handle.actions?.()}</div>
+        <div className="flex items-center justify-self-end">{handle.actions?.() ?? slot}</div>
       </header>
       <main className={`flex flex-col gap-5 px-5 pt-2 ${handle.hideTabs ? 'pb-[calc(120px+env(safe-area-inset-bottom))]' : 'pb-[calc(110px+env(safe-area-inset-bottom))]'}`}>
-        <Outlet />
+        <ActionSlot.Provider value={setSlot}>
+          <Outlet />
+        </ActionSlot.Provider>
       </main>
       {!handle.hideTabs && <TabBar />}
     </div>

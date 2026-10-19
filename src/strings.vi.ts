@@ -18,7 +18,7 @@ export const S = {
   crashTitle: 'Có lỗi khi hiển thị màn này',
   // Tiêu đề header theo SC (screen-flow v1 / prototype v2.1)
   titles: {
-    newShot: 'Shot mới',
+    newShot: 'Ghi shot',
     video: 'Quay video',
     gauge: 'Đọc đồng hồ',
     shotDetail: 'Chi tiết shot',

@@ -18,6 +18,12 @@ export default tseslint.config(
   {
     // Layer rule (architecture-design §Layer): domain không phụ thuộc UI / dữ liệu.
     files: ['src/domain/**/*.ts'],
-    rules: { 'no-restricted-imports': ['error', { patterns: ['../data/*', '../features/*', '../ui/*', '../app/*', 'react', 'dexie'] }] },
+    // Chỉ cho import kiểu (import type) từ data/types — không kéo code dữ liệu vào domain.
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['../data/*', '../features/*', '../ui/*', '../app/*', 'react', 'dexie'], allowTypeImports: true }] },
+      ],
+    },
   },
 )

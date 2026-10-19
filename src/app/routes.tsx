@@ -1,6 +1,10 @@
 import { Link, Navigate, type RouteObject } from 'react-router-dom'
+import { CupFormPage } from '../features/cup/CupFormPage'
 import { HomePage } from '../features/home/HomePage'
 import { PlaceholderPage } from '../features/placeholder/PlaceholderPage'
+import { ShotDetailPage } from '../features/shot/ShotDetailPage'
+import { ShotFormPage } from '../features/shot/ShotFormPage'
+import { ErrorScreen } from '../ui/ErrorScreen'
 import { Shell, type RouteHandle } from '../ui/Shell'
 import { S } from '../strings.vi'
 
@@ -23,18 +27,20 @@ const sub = (title: string): RouteHandle => ({ title })
 export const routes: RouteObject[] = [
   {
     element: <Shell />,
+    // NFR_011 — lỗi khi vẽ một màn → màn lỗi của app (không phải trang lỗi mặc định của router)
+    errorElement: <ErrorScreen message={S.crashTitle} actionLabel={S.reload} onAction={() => location.reload()} />,
     children: [
       { index: true, handle: { title: S.appName, tabRoot: true, actions: Gear } satisfies RouteHandle, element: <HomePage /> },
       page('history', tabRoot(S.tabs.history)),
-      page('shots/new', form(S.titles.newShot)),
+      page('shots/new', form(S.titles.newShot), <ShotFormPage mode="new" />),
       page('shots/new/video', form(S.titles.video)),
       page('shots/new/gauge', form(S.titles.gauge)),
-      page('shots/:id', sub(S.titles.shotDetail)),
-      page('shots/:id/edit', form(S.titles.editShot)),
+      page('shots/:id', sub(S.titles.shotDetail), <ShotDetailPage />),
+      page('shots/:id/edit', form(S.titles.editShot), <ShotFormPage mode="edit" />),
       page('shots/:id/edit/video', form(S.titles.video)),
       page('shots/:id/edit/gauge', form(S.titles.gauge)),
       page('shots/:id/gauge', form(S.titles.gauge)),
-      page('shots/:id/cup', form(S.titles.cup)),
+      page('shots/:id/cup', form(S.titles.cup), <CupFormPage />),
       page('compare', sub(S.titles.compare)),
       page('analytics', tabRoot(S.tabs.analytics)),
       page('gear', tabRoot(S.tabs.gear)),
